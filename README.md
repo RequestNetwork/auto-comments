@@ -28,16 +28,11 @@ jobs:
     uses: your-org/auto-comments/.github/workflows/pr-auto-comments.yml@main
     with:
       org_name: "your-organization-name"
-      # Enable only the comment types you want by providing content
+      # Optional: override the default comments
       first_pr_comment: |
         # Welcome to our project!
 
-        Thanks for your first contribution. We're glad you're here.
-      # To disable a comment type, either remove it or leave it empty
-      merged_pr_comment: |
-        # PR Merged
-
-        Thank you for your contribution!
+        Thanks for your first contribution, @{{username}}. We're glad you're here.
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -52,12 +47,12 @@ jobs:
 
 ### Optional Inputs
 
-| Input | Description | Default | Behavior if not provided |
+| Input | Description | Default | Behavior if empty string |
 |-------|-------------|---------|--------------------------|
 | `additional_internal_users` | Additional comma-separated list of usernames to consider as internal | `''` | No additional users excluded |
-| `first_pr_comment` | Message for first PR comments | `''` | First PR comments disabled |
-| `ready_for_review_comment` | Message for ready for review comments | `''` | Ready for review comments disabled |
-| `merged_pr_comment` | Message for merged PR comments | `''` | Merged PR comments disabled |
+| `first_pr_comment` | Message for first PR comments | Default welcome message | First PR comments disabled |
+| `ready_for_review_comment` | Message for ready for review comments | Default guidelines message | Ready for review comments disabled |
+| `merged_pr_comment` | Message for merged PR comments | Default thank you message | Merged PR comments disabled |
 
 ### Secrets
 
@@ -65,23 +60,50 @@ jobs:
 |--------|-------------|----------|---------|
 | `token` | GitHub token with org:read permission | No | `github.token` |
 
+## Default Messages
+
+The workflow includes default messages for each comment type:
+
+### First PR Comment
+A welcome message that mentions the contributor by username, introduces them to the project, and highlights the Best PR Initiative with its $500 quarterly prize.
+
+### Ready for Review Comment
+A reminder about contribution guidelines and the Best PR Initiative, encouraging clear PR descriptions to expedite the review process.
+
+### Merged PR Comment
+A congratulatory message that thanks the contributor, reminds them about the Best PR Initiative, and promotes the Request Network API for crypto payments and invoicing features.
+
 ## Enabling and Disabling Comment Types
 
-You can selectively enable comment types by providing content for the corresponding input:
+By default, all comment types are enabled with predefined messages. You can:
 
-- To **enable** a comment type: provide the message text
-- To **disable** a comment type: omit the input or provide an empty string
+- **Override** a default comment by providing your own message text
+- **Disable** a comment type by providing an empty string `''`
 
-For example, to enable only first PR and merged PR comments:
+For example, to disable ready for review comments:
+
+```yaml
+ready_for_review_comment: ''  # Explicitly set to empty string to disable
+```
+
+## Dynamic Content with Variable Placeholders
+
+You can include dynamic content in your messages using placeholders with the format `{{variable}}`. The following variables are available:
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `{{username}}` | The PR author's username | `octocat` |
+| `{{repository}}` | The repository name | `auto-comments` |
+| `{{org}}` | The organization/owner name | `your-org` |
+
+Example usage in a custom message:
 
 ```yaml
 first_pr_comment: |
-  # Welcome!
-  Thanks for your contribution.
-# ready_for_review_comment is omitted to disable it
-merged_pr_comment: |
-  # Merged
-  Your PR has been merged.
+  # Welcome @{{username}}!
+
+  Thank you for your first contribution to the {{repository}} repository.
+  We at {{org}} appreciate your interest in our project.
 ```
 
 ## Comment Formatting
@@ -95,6 +117,10 @@ You can use full Markdown syntax in your comment messages, including:
 - Code blocks
 - Emojis (`:tada:`)
 
+## Special Placeholders
+
+The first PR comment supports the `@<username>` placeholder, which will be automatically replaced with the PR author's username.
+
 ## How It Works
 
 1. The workflow first checks the PR author in a central job:
@@ -103,7 +129,7 @@ You can use full Markdown syntax in your comment messages, including:
 
 2. Based on the event type (opened/ready for review/merged) and author status:
    - Runs only the appropriate comment job
-   - Only if the corresponding comment text is provided
+   - Only if the corresponding comment text is not empty
 
 3. Each enabled job posts its specific comment to the PR
 

@@ -5,59 +5,37 @@ on:
     types: [opened, ready_for_review, closed]
 
 jobs:
-  # Example 1: All comment types enabled
-  pr-comments-all:
+  # Example 1: Using default comments
+  pr-comments-defaults:
     uses: your-org/auto-comments/.github/workflows/pr-auto-comments.yml@main
     with:
       org_name: "your-organization-name"
       additional_internal_users: "external-consultant,bot-account"
-
-      # First PR comment
-      first_pr_comment: |
-        # 🌟 Welcome to your first contribution!
-
-        We're thrilled to see your first PR to our project. Here at [Organization], we value every contribution.
-
-        ## Next steps
-        - Our team will review your changes soon
-        - You might get some feedback or requests for changes
-        - Feel free to ask questions if anything is unclear
-
-        Thank you for taking the time to contribute to our project!
-
-      # Ready for review comment
-      ready_for_review_comment: |
-        # Ready for review - thank you!
-
-        Your PR has been marked as ready for review and will be reviewed by our team soon.
-
-        Please allow 2-3 business days for the review process.
-
-      # Merged PR comment
-      merged_pr_comment: |
-        # Congratulations! 🎉
-
-        Your PR has been merged successfully. Thank you for your valuable contribution!
-
-        Your changes will be included in the next release of our software.
+      # No comment content provided - will use defaults
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
 
-  # Example 2: Only specific comment types enabled
-  pr-comments-selective:
+  # Example 2: Customizing some comments, disabling others
+  pr-comments-custom:
     uses: your-org/auto-comments/.github/workflows/pr-auto-comments.yml@main
     with:
       org_name: "your-organization-name"
 
-      # Only enable first PR and merged PR comments
+      # Custom first PR comment with variable placeholders
       first_pr_comment: |
-        # Welcome to our project!
-        Thank you for your first contribution!
+        # Welcome @{{username}}!
 
-      # Ready for review comments disabled by not providing this input
+        Thank you for your first contribution to the {{repository}} repository.
+        Our {{org}} team will review your changes soon.
 
+      # Disable ready for review comments
+      ready_for_review_comment: ''
+
+      # Custom merged PR comment with variable placeholders
       merged_pr_comment: |
-        # PR Merged
-        Thank you for your contribution!
+        # Congratulations on your merged PR! 🎉
+
+        Thank you @{{username}} for your contribution to {{repository}}!
+        Your changes are now part of the {{org}} codebase.
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}

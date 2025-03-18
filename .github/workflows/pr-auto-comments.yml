@@ -16,17 +16,17 @@ on:
         description: 'Message for first PR comments (leave empty to disable first PR comments)'
         required: false
         type: string
-        default: ''
+        default: 'Hello @{{username}}, thank you for submitting your first pull request to the {{repository}} repository. We value your contribution and encourage you to review our contribution guidelines to ensure your submission meets our standards. Please note that every merged PR is automatically enrolled in our Best PR Initiative, offering a chance to win $500 each quarter. Our team is available via GitHub Discussions or Discord if you have any questions. Welcome aboard!'
       ready_for_review_comment:
         description: 'Message for PR ready for review comments (leave empty to disable ready for review comments)'
         required: false
         type: string
-        default: ''
+        default: 'Thank you for your submission! As you prepare for the review process, please ensure that your PR title, description, and any linked issues fully comply with our contribution guidelines. A clear explanation of your changes and their context will help expedite the review process. Every merged PR is automatically entered into our Best PR Initiative, offering a chance to win $500 every quarter. We appreciate your attention to detail and look forward to reviewing your contribution!'
       merged_pr_comment:
         description: 'Message for merged PR comments (leave empty to disable merged PR comments)'
         required: false
         type: string
-        default: ''
+        default: 'Congratulations, your pull request has been merged! Thank you for your valuable contribution to Request Network. As a reminder, every merged PR is automatically entered into our Best PR Initiative, offering a quarterly prize of $500. Your work significantly supports our project\'s growth, and we encourage you to continue engaging with our community. Additionally, if you want to build or add crypto payments and invoicing features, explore how our API can reduce deployment time from months to hours while offering advanced features. Book a call with our expert to learn more and fast-track your development.'
     secrets:
       token:
         description: 'GitHub token with org:read permission'
@@ -127,11 +127,23 @@ jobs:
         with:
           github-token: ${{ github.token }}
           script: |
+            const variables = {
+              username: context.payload.pull_request.user.login,
+              repository: context.payload.repository.name,
+              org: context.repo.owner,
+            };
+
+            let commentBody = `${{ inputs.first_pr_comment }}`;
+            Object.entries(variables).forEach(([key, value]) => {
+              const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+              commentBody = commentBody.replace(regex, value);
+            });
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `${{ inputs.first_pr_comment }}`
+              body: commentBody
             });
 
   # Leave a comment when PR is marked ready for review
@@ -146,11 +158,23 @@ jobs:
         with:
           github-token: ${{ github.token }}
           script: |
+            const variables = {
+              username: context.payload.pull_request.user.login,
+              repository: context.payload.repository.name,
+              org: context.repo.owner,
+            };
+
+            let commentBody = `${{ inputs.ready_for_review_comment }}`;
+            Object.entries(variables).forEach(([key, value]) => {
+              const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+              commentBody = commentBody.replace(regex, value);
+            });
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `${{ inputs.ready_for_review_comment }}`
+              body: commentBody
             });
 
   # Leave a comment when PR is merged
@@ -165,9 +189,21 @@ jobs:
         with:
           github-token: ${{ github.token }}
           script: |
+            const variables = {
+              username: context.payload.pull_request.user.login,
+              repository: context.payload.repository.name,
+              org: context.repo.owner,
+            };
+
+            let commentBody = `${{ inputs.merged_pr_comment }}`;
+            Object.entries(variables).forEach(([key, value]) => {
+              const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+              commentBody = commentBody.replace(regex, value);
+            });
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `${{ inputs.merged_pr_comment }}`
+              body: commentBody
             });
