@@ -37,6 +37,24 @@ jobs:
       token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
+## Workflow Updates and Versioning
+
+This workflow uses a reference to the branch (`@main`) rather than a specific version tag. This means:
+
+- **Automatic Updates**: When the workflow code is updated in the `main` branch, all repositories referencing it will automatically use the latest version without requiring any changes in those repositories.
+- **Breaking Changes**: Be cautious when making changes to the workflow in the `main` branch, as they will immediately affect all dependent repositories. Test significant changes thoroughly before merging them into `main`.
+
+### Recommendations for Stability
+
+If you need more stability and control over updates, consider:
+1. Using version tags (e.g., `@v1`, `@v2`) instead of `@main`.
+2. Having repositories explicitly opt-in to new versions by updating their workflow reference.
+
+For example, to use a specific version tag:
+```yaml
+uses: your-org/auto-comments/.github/workflows/pr-auto-comments.yml@v1
+```
+
 ## Configuration
 
 ### Required Inputs
