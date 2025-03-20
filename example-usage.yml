@@ -1,0 +1,41 @@
+name: PR Comments
+
+on:
+  pull_request_target:
+    types: [opened, ready_for_review, closed]
+
+jobs:
+  # Example 1: Using default comments
+  pr-comments-defaults:
+    uses: your-org/auto-comments/.github/workflows/pr-auto-comments.yml@main
+    with:
+      org_name: "your-organization-name"
+      additional_internal_users: "external-consultant,bot-account"
+      # No comment content provided - will use defaults
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Example 2: Customizing some comments, disabling others
+  pr-comments-custom:
+    uses: your-org/auto-comments/.github/workflows/pr-auto-comments.yml@main
+    with:
+      org_name: "your-organization-name"
+
+      # Custom first PR comment with variable placeholders
+      first_pr_comment: |
+        # Welcome @{{username}}!
+
+        Thank you for your first contribution to the {{repository}} repository.
+        Our {{org}} team will review your changes soon.
+
+      # Disable ready for review comments
+      ready_for_review_comment: ''
+
+      # Custom merged PR comment with variable placeholders
+      merged_pr_comment: |
+        # Congratulations on your merged PR! 🎉
+
+        Thank you @{{username}} for your contribution to {{repository}}!
+        Your changes are now part of the {{org}} codebase.
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
