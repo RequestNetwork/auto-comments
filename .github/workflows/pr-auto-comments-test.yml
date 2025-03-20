@@ -1,0 +1,131 @@
+name: PR Automated Comments Test
+
+on:
+  # Automatic triggers
+  pull_request_target:
+    types: [opened, ready_for_review, closed]
+
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      test_event_type:
+        description: 'Event type to simulate for testing'
+        required: true
+        type: choice
+        options:
+          - opened
+          - ready_for_review
+          - merged
+
+jobs:
+  # When manually triggered, we need to simulate the PR event context
+  prepare-test-context:
+    name: Prepare Test Context
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    outputs:
+      is_external: 'true'
+      is_first_pr: ${{ steps.set-context.outputs.is_first_pr }}
+      event_type: ${{ steps.set-context.outputs.event_type }}
+    steps:
+      - name: Set test context variables
+        id: set-context
+        run: |
+          EVENT_TYPE="${{ github.event.inputs.test_event_type }}"
+          echo "event_type=$EVENT_TYPE" >> $GITHUB_OUTPUT
+
+          # For the opened event, we need to simulate first PR status
+          if [[ "$EVENT_TYPE" == "opened" ]]; then
+            echo "is_first_pr=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_first_pr=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Real workflow for actual PR events
+  pr-comments-real:
+    name: PR Comments (Real)
+    if: github.event_name == 'pull_request_target'
+    uses: ./.github/workflows/pr-auto-comments.yml@${{ github.ref_name }}
+    with:
+      org_name: "RequestNetwork"
+      # You can specify additional internal users here if needed
+      additional_internal_users: ""
+      # Use default messages
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Test workflow for manual triggering - using the actual reusable workflow
+  first-pr-comment-test:
+    name: First PR Comment (Test)
+    needs: prepare-test-context
+    if: github.event_name == 'workflow_dispatch' && needs.prepare-test-context.outputs.event_type == 'opened'
+    uses: ./.github/workflows/pr-auto-comments.yml@${{ github.ref_name }}
+    with:
+      org_name: "RequestNetwork"
+      first_pr_comment: "Hello @{{username}}, thank you for submitting your first pull request to the {{repository}} repository. We value your contribution and encourage you to review our contribution guidelines to ensure your submission meets our standards. Please note that every merged PR is automatically enrolled in our Best PR Initiative, offering a chance to win $500 each quarter. Our team is available via GitHub Discussions or Discord if you have any questions. Welcome aboard! (TEST)"
+      ready_for_review_comment: ""
+      merged_pr_comment: ""
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+
+  ready-for-review-comment-test:
+    name: Ready for Review Comment (Test)
+    needs: prepare-test-context
+    if: github.event_name == 'workflow_dispatch' && needs.prepare-test-context.outputs.event_type == 'ready_for_review'
+    uses: ./.github/workflows/pr-auto-comments.yml@${{ github.ref_name }}
+    with:
+      org_name: "RequestNetwork"
+      first_pr_comment: ""
+      ready_for_review_comment: "Thank you for your submission! As you prepare for the review process, please ensure that your PR title, description, and any linked issues fully comply with our contribution guidelines. A clear explanation of your changes and their context will help expedite the review process. Every merged PR is automatically entered into our Best PR Initiative, offering a chance to win $500 every quarter. We appreciate your attention to detail and look forward to reviewing your contribution! (TEST)"
+      merged_pr_comment: ""
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+
+  merged-pr-comment-test:
+    name: Merged PR Comment (Test)
+    needs: prepare-test-context
+    if: github.event_name == 'workflow_dispatch' && needs.prepare-test-context.outputs.event_type == 'merged'
+    uses: ./.github/workflows/pr-auto-comments.yml@${{ github.ref_name }}
+    with:
+      org_name: "RequestNetwork"
+      first_pr_comment: ""
+      ready_for_review_comment: ""
+      merged_pr_comment: "Congratulations, your pull request has been merged! Thank you for your valuable contribution to Request Network. As a reminder, every merged PR is automatically entered into our Best PR Initiative, offering a quarterly prize of $500. Your work significantly supports our project's growth, and we encourage you to continue engaging with our community. Additionally, if you want to build or add crypto payments and invoicing features, explore how our API can reduce deployment time from months to hours while offering advanced features. Book a call with our expert to learn more and fast-track your development. (TEST)"
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Add completion notification
+  notify-test-completion:
+    name: Notify Test Completion
+    needs: [prepare-test-context]
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create notification issue comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const eventType = '${{ needs.prepare-test-context.outputs.event_type }}';
+            const repoName = context.repo.repo;
+            const orgName = context.repo.owner;
+
+            const issue_number = context.issue.number || 1;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+              body: `## Test for "${eventType}" PR Event Initiated
+
+              A test of the \`${eventType}\` PR event comment has been initiated.
+
+              **Note:** Since this is a manual test, this will use hard-coded test variables:
+              - Repository: ${repoName}
+              - Organization: ${orgName}
+              - Testing as an external contributor
+
+              Check the [Actions tab](https://github.com/${orgName}/${repoName}/actions/workflows/repo-pr-comments.yml) to see the workflow execution.
+
+              *This is a notification from the manual test trigger.*`
+            });
