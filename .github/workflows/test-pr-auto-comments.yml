@@ -1,10 +1,6 @@
-name: PR Automated Comments Test
+name: Test PR Automated Comments
 
 on:
-  # Automatic triggers
-  pull_request_target:
-    types: [opened, ready_for_review, closed]
-
   # Manual trigger for testing
   workflow_dispatch:
     inputs:
@@ -21,7 +17,6 @@ jobs:
   # When manually triggered, we need to simulate the PR event context
   prepare-test-context:
     name: Prepare Test Context
-    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     outputs:
       is_external: 'true'
@@ -41,25 +36,12 @@ jobs:
             echo "is_first_pr=false" >> $GITHUB_OUTPUT
           fi
 
-  # Real workflow for actual PR events
-  pr-comments-real:
-    name: PR Comments (Real)
-    if: github.event_name == 'pull_request_target'
-    uses: ./.github/workflows/pr-auto-comments.yml@${{ github.ref_name }}
-    with:
-      org_name: "RequestNetwork"
-      # You can specify additional internal users here if needed
-      additional_internal_users: ""
-      # Use default messages
-    secrets:
-      token: ${{ secrets.GITHUB_TOKEN }}
-
   # Test workflow for manual triggering - using the actual reusable workflow
   first-pr-comment-test:
     name: First PR Comment (Test)
     needs: prepare-test-context
-    if: github.event_name == 'workflow_dispatch' && needs.prepare-test-context.outputs.event_type == 'opened'
-    uses: ./.github/workflows/pr-auto-comments.yml@${{ github.ref_name }}
+    if: needs.prepare-test-context.outputs.event_type == 'opened'
+    uses: ./.github/workflows/pr-auto-comments.yml
     with:
       org_name: "RequestNetwork"
       first_pr_comment: "Hello @{{username}}, thank you for submitting your first pull request to the {{repository}} repository. We value your contribution and encourage you to review our contribution guidelines to ensure your submission meets our standards. Please note that every merged PR is automatically enrolled in our Best PR Initiative, offering a chance to win $500 each quarter. Our team is available via GitHub Discussions or Discord if you have any questions. Welcome aboard! (TEST)"
@@ -71,8 +53,8 @@ jobs:
   ready-for-review-comment-test:
     name: Ready for Review Comment (Test)
     needs: prepare-test-context
-    if: github.event_name == 'workflow_dispatch' && needs.prepare-test-context.outputs.event_type == 'ready_for_review'
-    uses: ./.github/workflows/pr-auto-comments.yml@${{ github.ref_name }}
+    if: needs.prepare-test-context.outputs.event_type == 'ready_for_review'
+    uses: ./.github/workflows/pr-auto-comments.yml
     with:
       org_name: "RequestNetwork"
       first_pr_comment: ""
@@ -84,8 +66,8 @@ jobs:
   merged-pr-comment-test:
     name: Merged PR Comment (Test)
     needs: prepare-test-context
-    if: github.event_name == 'workflow_dispatch' && needs.prepare-test-context.outputs.event_type == 'merged'
-    uses: ./.github/workflows/pr-auto-comments.yml@${{ github.ref_name }}
+    if: needs.prepare-test-context.outputs.event_type == 'merged'
+    uses: ./.github/workflows/pr-auto-comments.yml
     with:
       org_name: "RequestNetwork"
       first_pr_comment: ""
@@ -98,7 +80,6 @@ jobs:
   notify-test-completion:
     name: Notify Test Completion
     needs: [prepare-test-context]
-    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Create notification issue comment
@@ -110,22 +91,30 @@ jobs:
             const repoName = context.repo.repo;
             const orgName = context.repo.owner;
 
-            const issue_number = context.issue.number || 1;
+            console.log(`Running test for ${eventType} event in ${orgName}/${repoName}`);
 
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issue_number,
-              body: `## Test for "${eventType}" PR Event Initiated
+            try {
+              const issue_number = 1; // Use issue #1 as fallback
 
-              A test of the \`${eventType}\` PR event comment has been initiated.
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue_number,
+                body: `## Test for "${eventType}" PR Event Initiated
 
-              **Note:** Since this is a manual test, this will use hard-coded test variables:
-              - Repository: ${repoName}
-              - Organization: ${orgName}
-              - Testing as an external contributor
+                A test of the \`${eventType}\` PR event comment has been initiated.
 
-              Check the [Actions tab](https://github.com/${orgName}/${repoName}/actions/workflows/repo-pr-comments.yml) to see the workflow execution.
+                **Note:** Since this is a manual test, this will use hard-coded test variables:
+                - Repository: ${repoName}
+                - Organization: ${orgName}
+                - Testing as an external contributor
 
-              *This is a notification from the manual test trigger.*`
-            });
+                Check the [Actions tab](https://github.com/${orgName}/${repoName}/actions/workflows/pr-auto-comments-test.yml) to see the workflow execution.
+
+                *This is a notification from the manual test trigger.*`
+              });
+              console.log('Created notification comment on issue #1');
+            } catch (error) {
+              console.log('Error creating comment:', error);
+              console.log('Continuing without creating a comment');
+            }
