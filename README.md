@@ -38,8 +38,66 @@ jobs:
 
         Thanks for your first contribution, @{{username}}. We're glad you're here.
     secrets:
-      token: ${{ secrets.GITHUB_TOKEN }}
+      token: ${{ secrets.GH_PAT }}
 ```
+
+## How to Create a Personal Access Token (PAT)
+
+Creating a Personal Access Token (PAT) for GitHub is a straightforward process:
+
+1. **Log in to your GitHub account**
+2. **Go to your Settings**:
+   - Click on your profile photo in the top-right corner
+   - Select "Settings" from the dropdown menu
+3. **Navigate to Developer settings**:
+   - Scroll down to the bottom of the sidebar
+   - Click on "Developer settings"
+4. **Select Personal access tokens**:
+   - Click on "Personal access tokens"
+   - Choose "Fine-grained tokens" or "Tokens (classic)" depending on your needs
+
+### Required Permissions for Fine-grained Tokens
+
+When creating a fine-grained personal access token, you'll need to configure the following permissions:
+
+**Repository permissions:**
+- **Contents**: Read (to access repository content)
+- **Pull requests**: Read and Write (to read PR details and add comments)
+- **Issues**: Read and Write (for commenting, as GitHub treats PR comments as issue comments)
+- **Metadata**: Read (required for most API operations)
+
+**Organization permissions:**
+- **Members**: Read (to check if the PR author is an organization member)
+
+5. **Generate a new token**:
+   - Click "Generate new token"
+6. **Configure token settings**:
+   - Add a descriptive note to remember what this token is for (e.g., "Auto Comments Workflow")
+   - Set an expiration date (consider security implications)
+   - Select the repositories that will use this token
+   - Select the permissions listed above
+7. **Generate the token**:
+   - Click "Generate token" at the bottom
+8. **Copy your token**:
+   - **IMPORTANT**: Copy the token immediately as you won't be able to see it again
+
+After generating the token, you need to add it as a repository secret:
+
+### Adding Repository Secrets
+
+1. Go to your repository
+2. Click on "Settings"
+3. In the left sidebar, click on "Secrets and variables" → "Actions"
+4. Click "New repository secret"
+5. Name the secret `GH_PAT` (to match the example-usage.yml)
+   - **Note**: Secret names must NOT start with `GITHUB_` as this prefix is reserved by GitHub
+6. Paste your token value
+7. Click "Add secret"
+
+### References
+For more detailed information about GitHub tokens and permissions, refer to the [GitHub documentation on fine-grained personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-fine-grained-personal-access-token).
+
+For more information about using secrets in GitHub Actions, see [GitHub's documentation on using secrets in GitHub Actions](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions).
 
 ## Workflow Updates and Versioning
 
