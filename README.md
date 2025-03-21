@@ -2,6 +2,10 @@
 
 This reusable workflow adds automated comments on Pull Requests from external contributors. It identifies external contributors as users who are not members of your GitHub organization.
 
+## Overview
+
+The `pr-auto-comments` workflow automatically posts customizable comments on Pull Requests submitted by external contributors (those outside your organization). It helps maintain consistent communication with contributors while reducing manual effort from maintainers.
+
 ## Features
 
 The workflow can leave comments in these situations:
@@ -25,7 +29,7 @@ on:
 
 jobs:
   pr-comments:
-    uses: your-org/auto-comments/.github/workflows/pr-auto-comments.yml@main
+    uses: RequestNetwork/auto-comments/.github/workflows/pr-auto-comments.yml@main
     with:
       org_name: "your-organization-name"
       # Optional: override the default comments
@@ -158,6 +162,16 @@ This architecture ensures contributor checks run only once per workflow executio
 This workflow uses `pull_request_target` to ensure it has the necessary permissions to comment on PRs. Since this event has access to secrets, the workflow is designed to only perform safe operations (commenting) and does not check out code from external PRs.
 
 The workflow requires a token with `org:read` permission to check organization membership.
+
+## Integration Testing
+
+For integration testing purposes, we maintain a separate [auto-comments-test](https://github.com/RequestNetwork/auto-comments-test) repository. This repository contains workflows that:
+
+1. Test actual PR events using the reusable workflow
+2. Allow manual simulation of different PR events
+3. Support testing different branches or versions of the workflow
+
+If you're developing changes to this workflow, you can test them using the integration test repository before merging to the main branch.
 
 ## License
 
