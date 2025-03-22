@@ -104,15 +104,11 @@ jobs:
 
           # Only check if this is their first PR if needed
           if [[ "${{ steps.event.outputs.type }}" == "opened" ]]; then
-            # Check if this is their first PR to the repo
-            PR_COUNT=$(gh api graphql -f query='
-              query($owner:String!, $repo:String!, $author:String!) {
-                repository(owner:$owner, name:$repo) {
-                  pullRequests(first:100, states:[OPEN, CLOSED, MERGED], author:$author) {
-                    totalCount
-                  }
-                }
-              }' -f owner=${{ github.repository_owner }} -f repo=${{ github.event.repository.name }} -f author=$PR_AUTHOR | jq '.data.repository.pullRequests.totalCount')
+            # Check if this is their first PR to the repo using REST API instead of GraphQL
+            PR_COUNT=$(gh api -H "Accept: application/vnd.github+json" \
+              "/repos/${{ github.repository_owner }}/${{ github.event.repository.name }}/pulls?state=all&creator=$PR_AUTHOR" | jq length)
+
+            echo "Found $PR_COUNT PRs from this contributor"
 
             if [ "$PR_COUNT" -eq 1 ]; then
               echo "First PR from this contributor"
