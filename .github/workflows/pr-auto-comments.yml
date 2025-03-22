@@ -47,16 +47,27 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "pull_request_target" ]]; then
             if [[ "${{ github.event.action }}" == "opened" ]]; then
-              echo "type=opened" >> $GITHUB_OUTPUT
+              # Check if PR was opened and is not a draft
+              if [[ "${{ github.event.pull_request.draft }}" == "false" ]]; then
+                echo "type=opened" >> $GITHUB_OUTPUT
+                echo "type_ready=true" >> $GITHUB_OUTPUT
+              else
+                echo "type=opened" >> $GITHUB_OUTPUT
+                echo "type_ready=false" >> $GITHUB_OUTPUT
+              fi
             elif [[ "${{ github.event.action }}" == "ready_for_review" ]]; then
               echo "type=ready_for_review" >> $GITHUB_OUTPUT
+              echo "type_ready=true" >> $GITHUB_OUTPUT
             elif [[ "${{ github.event.action }}" == "closed" && "${{ github.event.pull_request.merged }}" == "true" ]]; then
               echo "type=merged" >> $GITHUB_OUTPUT
+              echo "type_ready=false" >> $GITHUB_OUTPUT
             else
               echo "type=other" >> $GITHUB_OUTPUT
+              echo "type_ready=false" >> $GITHUB_OUTPUT
             fi
           else
             echo "type=other" >> $GITHUB_OUTPUT
+            echo "type_ready=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Check if external contributor
@@ -150,7 +161,7 @@ jobs:
   ready-for-review-comment:
     name: Ready for Review Comment
     needs: check-contributor
-    if: needs.check-contributor.outputs.event_type == 'ready_for_review' && needs.check-contributor.outputs.is_external == 'true' && inputs.ready_for_review_comment != ''
+    if: (needs.check-contributor.outputs.event_type == 'ready_for_review' || (needs.check-contributor.outputs.event_type == 'opened' && needs.check-contributor.outputs.type_ready == 'true')) && needs.check-contributor.outputs.is_external == 'true' && inputs.ready_for_review_comment != ''
     runs-on: ubuntu-latest
     steps:
       - name: Leave ready for review comment
