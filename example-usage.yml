@@ -13,7 +13,7 @@ jobs:
       additional_internal_users: "external-consultant,bot-account"
       # No comment content provided - will use defaults
     secrets:
-      token: ${{ secrets.GH_PAT }}
+      token: ${{ secrets.GH_PAT_AUTO_COMMENTS }}
 
   # Example 2: Customizing some comments, disabling others
   pr-comments-custom:
@@ -38,4 +38,4 @@ jobs:
         Thank you @{{username}} for your contribution to {{repository}}!
         Your changes are now part of the {{org}} codebase.
     secrets:
-      token: ${{ secrets.GH_PAT }}
+      token: ${{ secrets.GH_PAT_AUTO_COMMENTS }}

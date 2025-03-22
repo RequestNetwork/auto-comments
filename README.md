@@ -38,7 +38,7 @@ jobs:
 
         Thanks for your first contribution, @{{username}}. We're glad you're here.
     secrets:
-      token: ${{ secrets.GH_PAT }}
+      token: ${{ secrets.GH_PAT_AUTO_COMMENTS }}
 ```
 
 ## How to Create a Personal Access Token (PAT)
@@ -83,16 +83,30 @@ When creating a fine-grained personal access token, you'll need to configure the
 
 After generating the token, you need to add it as a repository secret:
 
-### Adding Repository Secrets
+### Adding Repository or Organization Secrets
 
+You can configure this workflow with either a repository-level secret or an organization-level secret:
+
+#### For Repository-Level Secret:
 1. Go to your repository
 2. Click on "Settings"
 3. In the left sidebar, click on "Secrets and variables" → "Actions"
 4. Click "New repository secret"
-5. Name the secret `GH_PAT` (to match the example-usage.yml)
-   - **Note**: Secret names must NOT start with `GITHUB_` as this prefix is reserved by GitHub
+5. Name the secret `GH_PAT_AUTO_COMMENTS`
 6. Paste your token value
 7. Click "Add secret"
+
+#### For Organization-Level Secret:
+1. Go to your organization's main page
+2. Click on "Settings"
+3. In the left sidebar, click on "Secrets and variables" → "Actions"
+4. Click "New organization secret"
+5. Name the secret `GH_PAT_AUTO_COMMENTS`
+6. Choose your repository access policy (all repositories or select repositories)
+7. Paste your token value
+8. Click "Add secret"
+
+Both repository-level and organization-level secrets are accessed the same way in workflows: `${{ secrets.GH_PAT_AUTO_COMMENTS }}`.
 
 ### References
 For more detailed information about GitHub tokens and permissions, refer to the [GitHub documentation on fine-grained personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-fine-grained-personal-access-token).
