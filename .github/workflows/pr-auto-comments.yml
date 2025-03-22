@@ -125,7 +125,7 @@ jobs:
       - name: Leave first PR comment
         uses: actions/github-script@v6
         with:
-          github-token: ${{ github.token }}
+          github-token: ${{ secrets.token || github.token }}
           script: |
             const variables = {
               username: context.payload.pull_request.user.login,
@@ -156,7 +156,7 @@ jobs:
       - name: Leave ready for review comment
         uses: actions/github-script@v6
         with:
-          github-token: ${{ github.token }}
+          github-token: ${{ secrets.token || github.token }}
           script: |
             const variables = {
               username: context.payload.pull_request.user.login,
@@ -187,7 +187,7 @@ jobs:
       - name: Leave merged PR comment
         uses: actions/github-script@v6
         with:
-          github-token: ${{ github.token }}
+          github-token: ${{ secrets.token || github.token }}
           script: |
             const variables = {
               username: context.payload.pull_request.user.login,
