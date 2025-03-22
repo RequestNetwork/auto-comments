@@ -106,17 +106,6 @@ This workflow uses a reference to the branch (`@main`) rather than a specific ve
 - **Automatic Updates**: When the workflow code is updated in the `main` branch, all repositories referencing it will automatically use the latest version without requiring any changes in those repositories.
 - **Breaking Changes**: Be cautious when making changes to the workflow in the `main` branch, as they will immediately affect all dependent repositories. Test significant changes thoroughly before merging them into `main`.
 
-### Recommendations for Stability
-
-If you need more stability and control over updates, consider:
-1. Using version tags (e.g., `@v1`, `@v2`) instead of `@main`.
-2. Having repositories explicitly opt-in to new versions by updating their workflow reference.
-
-For example, to use a specific version tag:
-```yaml
-uses: your-org/auto-comments/.github/workflows/pr-auto-comments.yml@v1
-```
-
 ## Configuration
 
 ### Required Inputs
@@ -138,20 +127,7 @@ uses: your-org/auto-comments/.github/workflows/pr-auto-comments.yml@v1
 
 | Secret | Description | Required | Default |
 |--------|-------------|----------|---------|
-| `token` | GitHub token with org:read permission | No | `github.token` |
-
-## Default Messages
-
-The workflow includes default messages for each comment type:
-
-### First PR Comment
-A welcome message that mentions the contributor by username, introduces them to the project, and highlights the Best PR Initiative with its $500 quarterly prize.
-
-### Ready for Review Comment
-A reminder about contribution guidelines and the Best PR Initiative, encouraging clear PR descriptions to expedite the review process.
-
-### Merged PR Comment
-A congratulatory message that thanks the contributor, reminds them about the Best PR Initiative, and promotes the Request Network API for crypto payments and invoicing features.
+| `token` | GitHub token with necessary permissions (see above) | No | `github.token` |
 
 ## Enabling and Disabling Comment Types
 
@@ -223,13 +199,9 @@ The workflow requires a token with `org:read` permission to check organization m
 
 ## Integration Testing
 
-For integration testing purposes, we maintain a separate [auto-comments-test](https://github.com/RequestNetwork/auto-comments-test) repository. This repository contains workflows that:
+For integration testing purposes, we maintain a separate [auto-comments-test](https://github.com/RequestNetwork/auto-comments-test) repository. This repository provides a real-world environment for testing the workflow.
 
-1. Test actual PR events using the reusable workflow
-2. Allow manual simulation of different PR events
-3. Support testing different branches or versions of the workflow
-
-If you're developing changes to this workflow, you can test them using the integration test repository before merging to the main branch.
+If you're developing changes to this workflow, you should test them using the integration test repository before merging to the main branch.
 
 ## License
 
