@@ -164,14 +164,17 @@ first_pr_comment: |
 
 ## Comment Formatting
 
-You can use full Markdown syntax in your comment messages, including:
+You can use most Markdown syntax in your comment messages, including:
 
 - Headings (`# Heading`)
 - Lists (`- Item`)
 - Formatting (**bold**, *italic*)
 - Links (`[text](url)`)
-- Code blocks
+- Images
+- Tables
 - Emojis (`:tada:`)
+
+> **Note:** Triple backtick code blocks are not supported due to technical limitations with the GitHub Actions script environment. If you need to include code examples, consider using inline code with single backticks or HTML alternatives.
 
 ## Special Placeholders
 
