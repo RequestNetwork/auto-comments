@@ -104,17 +104,22 @@ jobs:
 
           # Only check if this is their first PR if needed
           if [[ "${{ steps.event.outputs.type }}" == "opened" ]]; then
-            # Check if this is their first PR to the repo using REST API instead of GraphQL
-            PR_COUNT=$(gh api -H "Accept: application/vnd.github+json" \
-              "/repos/${{ github.repository_owner }}/${{ github.event.repository.name }}/pulls?state=all&creator=$PR_AUTHOR" | jq length)
+            # Use the GitHub Search API to find PRs by this author to this specific repo
+            SEARCH_QUERY="repo:${{ github.repository }} is:pr author:$PR_AUTHOR"
+            PR_SEARCH=$(gh api -H "Accept: application/vnd.github+json" \
+              "/search/issues?q=$(echo $SEARCH_QUERY | sed 's/ /%20/g')&per_page=100" || echo '{"total_count": 0}')
 
-            echo "Found $PR_COUNT PRs from this contributor"
+            # Get the total count from the search results
+            PR_COUNT=$(echo $PR_SEARCH | jq '.total_count')
+
+            echo "Search query: $SEARCH_QUERY"
+            echo "Found $PR_COUNT PRs from this contributor to this repository"
 
             if [ "$PR_COUNT" -eq 1 ]; then
-              echo "First PR from this contributor"
+              echo "First PR from this contributor to this repository"
               echo "is_first_pr=true" >> $GITHUB_OUTPUT
             else
-              echo "Not the first PR from this contributor"
+              echo "Not the first PR from this contributor to this repository"
               echo "is_first_pr=false" >> $GITHUB_OUTPUT
             fi
           else
