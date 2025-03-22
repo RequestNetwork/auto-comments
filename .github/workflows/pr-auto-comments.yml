@@ -41,6 +41,7 @@ jobs:
       is_external: ${{ steps.check.outputs.is_external }}
       is_first_pr: ${{ steps.check.outputs.is_first_pr }}
       event_type: ${{ steps.event.outputs.type }}
+      type_ready: ${{ steps.event.outputs.type_ready }}
     steps:
       - name: Determine event type
         id: event
