@@ -190,10 +190,6 @@ You can use most Markdown syntax in your comment messages, including:
 
 > **Note:** Triple backtick code blocks are not supported due to technical limitations with the GitHub Actions script environment. If you need to include code examples, consider using inline code with single backticks or HTML alternatives.
 
-## Special Placeholders
-
-The first PR comment supports the `@<username>` placeholder, which will be automatically replaced with the PR author's username.
-
 ## How It Works
 
 1. The workflow first checks the PR author in a central job:
