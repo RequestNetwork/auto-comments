@@ -162,8 +162,12 @@ jobs:
   # Leave a comment when PR is marked ready for review
   ready-for-review-comment:
     name: Ready for Review Comment
-    needs: check-contributor
-    if: (needs.check-contributor.outputs.event_type == 'ready_for_review' || (needs.check-contributor.outputs.event_type == 'opened' && needs.check-contributor.outputs.type_ready == 'true')) && needs.check-contributor.outputs.is_external == 'true' && inputs.ready_for_review_comment != ''
+    needs: [check-contributor, first-pr-comment]
+    if: |
+      (needs.check-contributor.outputs.event_type == 'ready_for_review' ||
+      (needs.check-contributor.outputs.event_type == 'opened' && needs.check-contributor.outputs.type_ready == 'true')) &&
+      needs.check-contributor.outputs.is_external == 'true' &&
+      inputs.ready_for_review_comment != ''
     runs-on: ubuntu-latest
     steps:
       - name: Leave ready for review comment
