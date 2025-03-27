@@ -16,7 +16,7 @@ on:
         description: 'Message for first PR comments (leave empty to disable first PR comments)'
         required: false
         type: string
-        default: 'Hello @{{username}}, thank you for submitting your first pull request to the {{repository}} repository. We value your contribution and encourage you to review our contribution guidelines to ensure your submission meets our standards. Please note that every merged PR is automatically enrolled in our Best PR Initiative, offering a chance to win $500 each quarter. Our team is available via GitHub Discussions or Discord if you have any questions. Welcome aboard!'
+        default: 'Hello @{{username}}, thank you for submitting your first pull request to the {{repository}} repository. We value your contribution and encourage you to review our contribution guidelines to ensure your submission meets our standards. Please note that every merged PR is automatically enrolled in our Best PR Initiative, offering a chance to win $500 each quarter. Our team is available via [GitHub Discussions](https://github.com/orgs/RequestNetwork/discussions) or [Discord](https://request.network/discord) if you have any questions. Welcome aboard!'
       ready_for_review_comment:
         description: 'Message for PR ready for review comments (leave empty to disable ready for review comments)'
         required: false
@@ -26,7 +26,7 @@ on:
         description: 'Message for merged PR comments (leave empty to disable merged PR comments)'
         required: false
         type: string
-        default: 'Congratulations, your pull request has been merged! Thank you for your valuable contribution to Request Network. As a reminder, every merged PR is automatically entered into our Best PR Initiative, offering a quarterly prize of $500. Your work significantly supports our project''s growth, and we encourage you to continue engaging with our community. Additionally, if you want to build or add crypto payments and invoicing features, explore how our API can reduce deployment time from months to hours while offering advanced features. Book a call with our expert to learn more and fast-track your development.'
+        default: 'Congratulations, your pull request has been merged! Thank you for your valuable contribution to Request Network. As a reminder, every merged PR is automatically entered into our Best PR Initiative, offering a quarterly prize of $500. Your work significantly supports our project''s growth, and we encourage you to [continue engaging with our community](https://request.network/discord). Additionally, if you want to build or add crypto payments and [invoicing](https://request.network/invoicing) features, explore how our API can reduce deployment time from months to hours while offering advanced features. [Book a call with our expert](https://calendly.com/mariana-rn/request-network-intro) to learn more and fast-track your development.'
     secrets:
       token:
         description: 'GitHub token with org:read permission'
